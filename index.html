@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OdontoFlow — Clínica Escola</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --surface2: #f8fafc;
+  --border: #e2e8f0;
+  --ink: #0f172a;
+  --ink2: #475569;
+  --ink3: #94a3b8;
+  --primary: #0055cc;
+  --primary-light: #dbeafe;
+  --primary-dark: #003d99;
+  --green: #059669;
+  --green-light: #d1fae5;
+  --amber: #d97706;
+  --amber-light: #fef3c7;
+  --red: #dc2626;
+  --red-light: #fee2e2;
+  --purple: #7c3aed;
+  --purple-light: #ede9fe;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.10);
+  --sidebar-w: 240px;
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  font-size: 15px;
+}
+
+/* ── LAYOUT ── */
+.shell { display: flex; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--ink);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  overflow-y: auto;
+}
+
+.logo {
+  padding: 22px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.logo-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: var(--primary);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -.5px;
+}
+
+.logo strong { font-size: 1rem; font-weight: 700; letter-spacing: -.3px; }
+.logo small { color: rgba(255,255,255,.4); font-size: .75rem; }
+
+.nav { padding: 12px 10px; flex: 1; }
+
+.nav-section-label {
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  color: rgba(255,255,255,.3);
+  text-transform: uppercase;
+  padding: 10px 10px 5px;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: rgba(255,255,255,.55);
+  font-family: var(--font);
+  font-size: .88rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background .15s, color .15s;
+  margin-bottom: 2px;
+}
+
+.nav-btn svg { flex-shrink: 0; opacity: .6; }
+.nav-btn:hover { background: rgba(255,255,255,.07); color: #fff; }
+.nav-btn:hover svg { opacity: .9; }
+.nav-btn.active { background: var(--primary); color: #fff; }
+.nav-btn.active svg { opacity: 1; }
+
+.sidebar-footer {
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  font-size: .75rem;
+  color: rgba(255,255,255,.25);
+}
+
+/* ── MAIN ── */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.page-title { font-size: 1.05rem; font-weight: 700; letter-spacing: -.3px; }
+.page-sub { font-size: .8rem; color: var(--ink3); margin-top: 1px; }
+
+.session-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .8rem;
+  color: var(--ink2);
+}
+
+.session-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .4; }
+}
+
+.content { padding: 24px 28px; flex: 1; }
+
+/* ── VIEWS ── */
+.view { display: none; animation: fadeIn .2s ease; }
+.view.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ── GRID ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid-auto { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(280px,.8fr); gap: 16px; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 8px;
+}
+
+.card-title {
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--ink2);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+/* ── STAT CARDS ── */
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stat-icon {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.stat-value { font-size: 1.8rem; font-weight: 700; letter-spacing: -.04em; line-height: 1; }
+.stat-label { font-size: .78rem; color: var(--ink3); margin-top: 4px; }
+.stat-sub { font-size: .75rem; color: var(--ink3); margin-top: 2px; font-family: var(--mono); }
+
+/* ── FORM ELEMENTS ── */
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: .82rem; font-weight: 600; color: var(--ink2); margin-bottom: 5px; }
+
+input, textarea, select {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-family: var(--font);
+  font-size: .9rem;
+  color: var(--ink);
+  background: var(--surface);
+  outline: none;
+  transition: border .15s, box-shadow .15s;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,85,204,.1);
+}
+
+textarea { min-height: 100px; resize: vertical; line-height: 1.5; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: .88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-secondary { background: var(--surface); border: 1.5px solid var(--border); color: var(--ink2); }
+.btn-secondary:hover { background: var(--bg); }
+.btn-danger { background: var(--red-light); color: var(--red); }
+.btn-danger:hover { background: #fecaca; }
+.btn-green { background: var(--green-light); color: var(--green); }
+.btn-green:hover { background: #a7f3d0; }
+.btn-sm { padding: 6px 12px; font-size: .8rem; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+/* ── BADGE ── */
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.badge-blue { background: var(--primary-light); color: var(--primary); }
+.badge-green { background: var(--green-light); color: var(--green); }
+.badge-amber { background: var(--amber-light); color: var(--amber); }
+.badge-red { background: var(--red-light); color: var(--red); }
+.badge-purple { background: var(--purple-light); color: var(--purple); }
+
+/* ── ALERTS ── */
+.alert {
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  font-size: .85rem;
+  line-height: 1.5;
+  border-left: 3px solid;
+}
+
+.alert-info { background: var(--primary-light); border-color: var(--primary); color: #1e40af; }
+.alert-warn { background: var(--amber-light); border-color: var(--amber); color: #92400e; }
+.alert-danger { background: var(--red-light); border-color: var(--red); color: #991b1b; }
+.alert-success { background: var(--green-light); border-color: var(--green); color: #065f46; }
+
+/* ── CHECKLIST ── */
+.check-list { display: grid; gap: 8px; }
+
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 13px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.check-item:hover { border-color: var(--primary); }
+.check-item.done { background: var(--green-light); border-color: var(--green); }
+.check-item.done .check-label { text-decoration: line-through; color: var(--ink3); }
+
+.check-item input[type="checkbox"] { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; accent-color: var(--green); cursor: pointer; }
+.check-label { font-size: .88rem; line-height: 1.4; }
+
+/* ── PROCEDURE TABS ── */
+.proc-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+
+.proc-tab {
+  padding: 7px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink2);
+  font-family: var(--font);
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.proc-tab:hover { border-color: var(--primary); color: var(--primary); }
+.proc-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* ── TIMER ── */
+.timer-block {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: var(--surface2);
+}
+
+.timer-display {
+  font-family: var(--mono);
+  font-size: 2.4rem;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: .04em;
+  margin-bottom: 10px;
+}
+
+.timer-display.warn { color: var(--amber); }
+.timer-display.danger { color: var(--red); }
+
+/* ── TABLE ── */
+.table-wrap { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .85rem;
+}
+
+th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--ink3);
+  border-bottom: 1.5px solid var(--border);
+}
+
+td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+
+/* ── PATIENT CARD ── */
+.patient-card {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: border-color .15s, box-shadow .15s;
+  cursor: pointer;
+}
+
+.patient-card:hover { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,85,204,.08); }
+.patient-card.active-patient { border-color: var(--primary); background: var(--primary-light); }
+
+.patient-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: .9rem;
+  flex-shrink: 0;
+}
+
+.patient-name { font-weight: 600; font-size: .9rem; }
+.patient-meta { font-size: .78rem; color: var(--ink3); margin-top: 2px; }
+
+/* ── HISTORY LIST ── */
+.history-list { display: grid; gap: 6px; }
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  font-size: .83rem;
+  border: 1px solid var(--border);
+}
+
+.history-time { font-family: var(--mono); font-size: .75rem; color: var(--ink3); flex-shrink: 0; }
+
+/* ── NEXT CALL ── */
+.next-call-display {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+  padding: 16px;
+  background: var(--surface2);
+}
+
+.next-call-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -.03em;
+  margin-top: 4px;
+}
+
+.next-call-duo { font-size: .8rem; color: var(--ink3); }
+
+/* ── PROGRESS ── */
+.progress-bar-wrap { background: var(--border); border-radius: 999px; height: 6px; overflow: hidden; }
+.progress-bar { height: 100%; border-radius: 999px; background: var(--primary); transition: width .3s; }
+.progress-bar.green { background: var(--green); }
+.progress-bar.amber { background: var(--amber); }
+
+/* ── EMPTY ── */
+.empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--ink3);
+  font-size: .88rem;
+}
+
+.empty-icon { font-size: 2rem; margin-bottom: 8px; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.45);
+  z-index: 200;
+  display: none;
+  place-items: center;
+}
+
+.modal-overlay.open { display: grid; }
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: min(480px, 90vw);
+  box-shadow: var(--shadow-lg);
+  animation: slideUp .2s ease;
+}
+
+@keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.modal-title { font-weight: 700; font-size: 1rem; }
+.modal-close { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--ink3); padding: 4px; }
+
+/* ── PRINT STYLE (for prontuário export) ── */
+.no-print { }
+
+@media print {
+  .sidebar, .topbar, .no-print { display: none !important; }
+  .main { margin: 0; }
+  .content { padding: 0; }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); transition: transform .25s; }
+  .sidebar.open { transform: none; }
+  .main { margin-left: 0; }
+  .grid-2, .grid-3, .grid-auto { grid-template-columns: 1fr; }
+  .content { padding: 16px; }
+  .topbar { padding: 12px 16px; }
+}
+
+/* ── MISC ── */
+hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.text-muted { color: var(--ink3); font-size: .82rem; }
+.text-mono { font-family: var(--mono); }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mb-16 { margin-bottom: 16px; }
+.gap-8 { gap: 8px; }
+.flex { display: flex; align-items: center; }
+.justify-between { justify-content: space-between; }
+.w-full { width: 100%; }
+.font-bold { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <div class="logo-mark">
+      <div class="logo-icon">OF</div>
+      <div>
+        <strong>OdontoFlow</strong>
+      </div>
+    </div>
+    <small>Clínica Escola · v2.0</small>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section-label">Principal</div>
+    <button class="nav-btn active" data-view="dashboard">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-btn" data-view="pacientes">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Pacientes
+    </button>
+    <button class="nav-btn" data-view="triagem">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Triagem
+    </button>
+
+    <div class="nav-section-label" style="margin-top:8px">Procedimentos</div>
+    <button class="nav-btn" data-view="checklist">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Checklists
+    </button>
+    <button class="nav-btn" data-view="prontuario">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      Prontuário
+    </button>
+
+    <div class="nav-section-label" style="margin-top:8px">Organização</div>
+    <button class="nav-btn" data-view="distribuicao">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Distribuição
+    </button>
+    <button class="nav-btn" data-view="voluntarios">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Voluntários
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div id="session-clock" style="font-family:var(--mono);font-size:.8rem;color:rgba(255,255,255,.35)"></div>
+    <div style="margin-top:4px">Dados salvos localmente</div>
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="page-title">Dashboard</div>
+      <div class="page-sub" id="page-sub">Visão geral da sessão clínica</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="session-info">
+        <div class="session-dot"></div>
+        <span id="session-label">Sessão ativa</span>
+      </div>
+      <button class="btn btn-secondary btn-sm no-print" onclick="clearSession()">🗑 Limpar sessão</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="view active" id="view-dashboard">
+      <div class="grid-3 mb-16">
+        <div class="stat-card">
+          <div>
+            <div class="stat-value" id="stat-pacientes">0</div>
+            <div class="stat-label">Pacientes triados</div>
+            <div class="stat-sub">nesta sessão</div>
+          </div>
+          <div class="stat-icon" style="background:var(--primary-light)">
+            <svg width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div>
+            <div class="stat-value" id="stat-procedimentos">0</div>
+            <div class="stat-label">Procedimentos</div>
+            <div class="stat-sub">iniciados hoje</div>
+          </div>
+          <div class="stat-icon" style="background:var(--green-light)">
+            <svg width="20" height="20" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div>
+            <div class="stat-value" id="stat-voluntarios">0</div>
+            <div class="stat-label">Voluntários</div>
+            <div class="stat-sub">cadastrados</div>
+          </div>
+          <div class="stat-icon" style="background:var(--purple-light)">
+            <svg width="20" height="20" fill="none" stroke="var(--purple)" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-auto">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Últimas triagens</div>
+            <button class="btn btn-secondary btn-sm" onclick="navigate('triagem')">+ Nova</button>
+          </div>
+          <div id="dash-triagem-list">
+            <div class="empty-state"><div class="empty-icon">🦷</div>Nenhuma triagem registrada ainda.</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card mb-16">
+            <div class="card-header">
+              <div class="card-title">Próximo atendimento</div>
+            </div>
+            <div class="next-call-display" id="dash-next-call">
+              <div>
+                <div class="text-muted">Aguardando</div>
+                <div class="next-call-name">—</div>
+              </div>
+            </div>
+            <div class="mt-12">
+              <button class="btn btn-primary w-full" onclick="callNextFromDash()">Chamar próximo</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">Alertas</div></div>
+            <div id="dash-alerts">
+              <div class="alert alert-info">Sistema pronto. Inicie registrando um paciente na triagem.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PACIENTES ═══ -->
+    <div class="view" id="view-pacientes">
+      <div class="grid-auto">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Pacientes da sessão</div>
+            <button class="btn btn-primary btn-sm" onclick="navigate('triagem')">+ Novo paciente</button>
+          </div>
+          <div id="pacientes-list">
+            <div class="empty-state"><div class="empty-icon">👤</div>Nenhum paciente registrado. Registre pela Triagem.</div>
+          </div>
+        </div>
+
+        <div class="card" id="paciente-detail-card">
+          <div class="card-header"><div class="card-title">Detalhes do paciente</div></div>
+          <div id="paciente-detail">
+            <div class="empty-state">Selecione um paciente para ver os detalhes.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TRIAGEM ═══ -->
+    <div class="view" id="view-triagem">
+      <div class="grid-auto">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Nova triagem</div></div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label>Nome do paciente *</label>
+              <input id="t-nome" placeholder="Nome completo"/>
+            </div>
+            <div class="field">
+              <label>Idade</label>
+              <input id="t-idade" type="number" min="1" max="120" placeholder="Ex.: 34"/>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Queixa principal *</label>
+            <textarea id="t-queixa" placeholder="Descreva o que o paciente está sentindo..." style="min-height:80px"></textarea>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label>Histórico médico relevante</label>
+              <input id="t-historico" placeholder="Ex.: Hipertenso, diabético..."/>
+            </div>
+            <div class="field">
+              <label>Alergias</label>
+              <input id="t-alergias" placeholder="Ex.: Penicilina, látex..."/>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label>Medicamentos em uso</label>
+              <input id="t-medicamentos" placeholder="Ex.: Metformina 500mg"/>
+            </div>
+            <div class="field">
+              <label>Pressão arterial (se aferida)</label>
+              <input id="t-pa" placeholder="Ex.: 120/80"/>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Relato livre do paciente</label>
+            <textarea id="t-relato" placeholder="Transcreva o que o paciente relatou com suas palavras..."></textarea>
+          </div>
+
+          <div class="btn-row mt-8">
+            <button class="btn btn-primary" onclick="analisarTriagem()">🔍 Analisar e registrar</button>
+            <button class="btn btn-secondary" onclick="limparTriagem()">Limpar</button>
+          </div>
+
+          <div id="triagem-alerta" style="margin-top:12px"></div>
+        </div>
+
+        <div>
+          <div class="card mb-16">
+            <div class="card-header"><div class="card-title">Sintomas detectados</div></div>
+            <div class="check-list" id="t-sintomas-checks">
+              <label class="check-item"><input type="checkbox" value="dor"/> <span class="check-label">Dor contínua ou latejante</span></label>
+              <label class="check-item"><input type="checkbox" value="sensibilidade"/> <span class="check-label">Sensibilidade térmica</span></label>
+              <label class="check-item"><input type="checkbox" value="sangramento"/> <span class="check-label">Sangramento gengival</span></label>
+              <label class="check-item"><input type="checkbox" value="inchaco"/> <span class="check-label">Inchaço / edema</span></label>
+              <label class="check-item"><input type="checkbox" value="mau-halito"/> <span class="check-label">Mau hálito persistente</span></label>
+              <label class="check-item"><input type="checkbox" value="mobilidade"/> <span class="check-label">Dente amolecido</span></label>
+              <label class="check-item"><input type="checkbox" value="fratura"/> <span class="check-label">Fratura ou lascado</span></label>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">Perguntas direcionadas</div></div>
+            <ul class="history-list" id="t-perguntas">
+              <li class="history-item" style="color:var(--ink3);font-style:italic">Faça a análise para ver as perguntas.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CHECKLIST ═══ -->
+    <div class="view" id="view-checklist">
+      <div class="proc-tabs" id="proc-tabs"></div>
+
+      <div class="grid-auto">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title" id="proc-title">—</div>
+              <div class="text-muted mt-8" id="proc-desc"></div>
+            </div>
+            <div>
+              <span id="proc-progresso" class="badge badge-blue">0%</span>
+            </div>
+          </div>
+
+          <div class="progress-bar-wrap mb-16">
+            <div class="progress-bar" id="proc-progress-bar" style="width:0%"></div>
+          </div>
+
+          <div class="check-list" id="proc-checklist"></div>
+
+          <div class="btn-row mt-16">
+            <button class="btn btn-secondary btn-sm" onclick="resetChecklist()">↺ Reiniciar</button>
+            <button class="btn btn-green btn-sm" onclick="registrarProcedimento()">✓ Registrar procedimento</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="card mb-16">
+            <div class="card-header"><div class="card-title">Temporizador</div></div>
+            <div class="timer-block">
+              <div class="timer-display" id="timer-display">00:00</div>
+              <div class="text-muted" id="timer-ref" style="font-size:.78rem;margin-bottom:10px"></div>
+              <div class="btn-row">
+                <button class="btn btn-primary btn-sm" id="btn-timer-start" onclick="toggleTimer()">▶ Iniciar</button>
+                <button class="btn btn-secondary btn-sm" onclick="resetTimer()">↺ Zerar</button>
+              </div>
+            </div>
+            <div id="timer-alert" style="margin-top:10px"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">Dica clínica</div></div>
+            <div class="alert alert-info" id="proc-tip"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PRONTUÁRIO ═══ -->
+    <div class="view" id="view-prontuario">
+      <div class="grid-auto">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Prontuário simplificado</div>
+            <div class="btn-row gap-8">
+              <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨 Imprimir</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Selecionar paciente</label>
+            <select id="pront-select" onchange="carregarProntuario()">
+              <option value="">— Selecione —</option>
+            </select>
+          </div>
+
+          <div id="pront-content">
+            <div class="empty-state"><div class="empty-icon">📄</div>Selecione um paciente para ver o prontuário.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Anotação clínica</div></div>
+          <div class="field">
+            <label>Observação do estudante</label>
+            <textarea id="pront-obs" placeholder="Registre achados clínicos, condutas adotadas, encaminhamentos..." style="min-height:160px"></textarea>
+          </div>
+          <div class="field">
+            <label>Procedimento realizado</label>
+            <input id="pront-proc" placeholder="Ex.: Profilaxia, RAR, Restauração..."/>
+          </div>
+          <div class="field">
+            <label>Próxima consulta</label>
+            <input id="pront-proxima" type="date"/>
+          </div>
+          <button class="btn btn-primary" onclick="salvarAnotacao()">💾 Salvar anotação</button>
+          <div id="pront-msg" style="margin-top:10px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ DISTRIBUIÇÃO ═══ -->
+    <div class="view" id="view-distribuicao">
+      <div class="grid-auto">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Duplas de atendimento</div></div>
+
+          <div class="field">
+            <label>Cadastrar dupla (formato: Aluno 1 / Aluno 2)</label>
+            <div style="display:flex;gap:8px">
+              <input id="duo-input" placeholder="Ex.: Ana Lima / Pedro Souza" style="flex:1"/>
+              <button class="btn btn-primary" onclick="addDuo()">Adicionar</button>
+            </div>
+          </div>
+
+          <div id="duo-list-wrap">
+            <div class="empty-state"><div class="empty-icon">👥</div>Nenhuma dupla cadastrada.</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card mb-16">
+            <div class="card-header"><div class="card-title">Próximo atendimento</div></div>
+            <div class="next-call-display" id="dist-next-call">
+              <div>
+                <div class="text-muted">Aguardando</div>
+                <div class="next-call-name">—</div>
+                <div class="next-call-duo"></div>
+              </div>
+            </div>
+            <button class="btn btn-primary w-full mt-12" onclick="callNext()">📣 Chamar próximo</button>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">Histórico de chamadas</div></div>
+            <div class="history-list" id="call-history">
+              <div class="empty-state" style="padding:16px">Nenhuma chamada realizada.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ VOLUNTÁRIOS ═══ -->
+    <div class="view" id="view-voluntarios">
+      <div class="grid-auto">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Cadastro de voluntários</div></div>
+
+          <div class="alert alert-info mb-16">
+            Compartilhe o link desta página com potenciais pacientes voluntários para a clínica escola.
+          </div>
+
+          <div class="grid-2">
+            <div class="field"><label>Nome completo *</label><input id="vol-nome" placeholder="Nome completo"/></div>
+            <div class="field"><label>Idade *</label><input id="vol-idade" type="number" min="1" max="120" placeholder="Ex.: 42"/></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Telefone *</label><input id="vol-tel" placeholder="(98) 99999-0000"/></div>
+            <div class="field"><label>Disponibilidade *</label>
+              <select id="vol-disp">
+                <option value="">Selecione</option>
+                <option>Manhã</option>
+                <option>Tarde</option>
+                <option>Noite</option>
+                <option>Flexível</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Queixa ou interesse</label><input id="vol-queixa" placeholder="Ex.: Limpeza, dor no dente..."/></div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="addVoluntario()">✓ Cadastrar voluntário</button>
+            <button class="btn btn-secondary" onclick="copyLink()">🔗 Copiar link</button>
+          </div>
+          <div id="vol-msg" style="margin-top:10px"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Voluntários <span id="vol-count" class="badge badge-blue">0</span></div>
+            <button class="btn btn-secondary btn-sm" onclick="exportVoluntarios()">⬇ Exportar</button>
+          </div>
+          <div id="vol-list">
+            <div class="empty-state"><div class="empty-icon">❤️</div>Nenhum voluntário cadastrado.</div>
+          </div>
+          <div class="text-muted mt-12">Dados salvos no navegador. Para uso institucional, exige servidor e LGPD.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Título</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DADOS
+// ═══════════════════════════════════════════════════════
+
+const STORE = {
+  get: k => { try { return JSON.parse(localStorage.getItem('of_'+k)) || []; } catch { return []; } },
+  set: (k,v) => localStorage.setItem('of_'+k, JSON.stringify(v)),
+  getObj: k => { try { return JSON.parse(localStorage.getItem('of_'+k)) || {}; } catch { return {}; } },
+  setObj: (k,v) => localStorage.setItem('of_'+k, JSON.stringify(v)),
+};
+
+// ─── Procedimentos ───
+const PROCEDIMENTOS = {
+  triagem: {
+    title: 'Triagem inicial',
+    desc: 'Recepção e coleta de dados do paciente antes do atendimento.',
+    tip: 'Confirme identidade, queixa principal e sinais de alerta. Cheque pressão em idosos e cardiopatas.',
+    tempoRef: 'Tempo médio: 10–15 min',
+    alerta: 120,
+    items: [
+      'Recepcionar o paciente e confirmar nome e data de nascimento',
+      'Registrar queixa principal com as palavras do paciente',
+      'Perguntar histórico médico: doenças crônicas, cirurgias',
+      'Verificar alergias (medicamentos, látex, materiais)',
+      'Listar medicamentos em uso',
+      'Aferir pressão arterial se indicado',
+      'Avaliar sinais de alerta (febre, inchaço, dificuldade de abrir a boca)',
+      'Encaminhar para avaliação supervisionada',
+    ]
+  },
+  raio_x: {
+    title: 'Radiografia',
+    desc: 'Execução de exame radiográfico periapical ou panorâmico.',
+    tip: 'Posicione com atenção ao ângulo vertical e horizontal. Reposicionamento aumenta exposição.',
+    tempoRef: 'Tempo de posicionamento: 3–5 min',
+    alerta: 300,
+    items: [
+      'Identificar o tipo de radiografia solicitada',
+      'Explicar o procedimento ao paciente',
+      'Verificar contraindicações (gravidez, etc.)',
+      'Colocar avental de chumbo no paciente',
+      'Selecionar tamanho do filme/sensor correto',
+      'Posicionar o posicionador adequado',
+      'Ajustar ângulo vertical e horizontal',
+      'Confirmar alinhamento antes do disparo',
+      'Realizar a captura',
+      'Remover sensor com cuidado e revelar/processar imagem',
+      'Armazenar no prontuário digital',
+    ]
+  },
+  profilaxia: {
+    title: 'Profilaxia',
+    desc: 'Limpeza profissional com remoção de placa e tártaro supragengival.',
+    tip: 'Combine ritmo e pausas com o paciente. Irrigue frequentemente para conforto.',
+    tempoRef: 'Tempo médio: 30–45 min',
+    alerta: 2700,
+    items: [
+      'Confirmar ausência de contraindicações',
+      'Posicionar o paciente e ajustar a cadeira',
+      'Conferir EPIs (luvas, máscara, óculos)',
+      'Selecionar curetas e/ou ultrassom adequados',
+      'Realizar supra cálculo por quadrante',
+      'Aplicar pasta profilática com taça de borracha',
+      'Polir todas as superfícies acessíveis',
+      'Realizar irrigação final',
+      'Verificar resultado com espelho e sonda',
+      'Orientar higiene oral pós-limpeza',
+      'Registrar achados no prontuário',
+    ]
+  },
+  evidenciacao: {
+    title: 'Evidenciação',
+    desc: 'Uso de corante para demonstrar presença de biofilme ao paciente.',
+    tip: 'Use como ferramenta educacional, nunca como constrangimento. Mostre no espelho junto ao paciente.',
+    tempoRef: 'Tempo médio: 10–15 min',
+    alerta: 900,
+    items: [
+      'Explicar a finalidade da evidenciação ao paciente',
+      'Aplicar evidenciador conforme orientação do supervisor',
+      'Aguardar o tempo de ação indicado',
+      'Mostrar as áreas marcadas ao paciente com espelho',
+      'Identificar e registrar os pontos de maior acúmulo',
+      'Demonstrar técnica de escovação correta',
+      'Orientar uso do fio dental nas áreas críticas',
+    ]
+  },
+  rar: {
+    title: 'RAR',
+    desc: 'Raspagem e alisamento radicular para tratamento periodontal.',
+    tip: 'A anestesia local é muitas vezes necessária. Verifique com o supervisor antes de iniciar.',
+    tempoRef: 'Por quadrante: 45–60 min',
+    alerta: 3600,
+    items: [
+      'Revisar sondagem periodontal do paciente',
+      'Confirmar indicação de RAR com o supervisor',
+      'Aplicar anestesia local se indicado',
+      'Aguardar efeito anestésico (± 3 min)',
+      'Selecionar curetas de Gracey adequadas por área',
+      'Realizar instrumentação subgengival por quadrante',
+      'Irrigar com solução salina ou clorexidina',
+      'Avaliar alisamento com ponta do explorador',
+      'Remover cálculo residual se presente',
+      'Orientar cuidados pós-procedimento',
+      'Registrar profundidade de sondagem pós-RAR',
+    ]
+  },
+  restauracao: {
+    title: 'Restauração',
+    desc: 'Procedimento restaurador em resina composta ou amálgama.',
+    tip: 'O isolamento absoluto é fundamental. Não avance sem contaminação zero no campo operatório.',
+    tempoRef: 'Por restauração: 45–90 min',
+    alerta: 5400,
+    items: [
+      'Confirmar o dente a ser restaurado (ficha + rx)',
+      'Aplicar anestesia local se indicado',
+      'Instalar isolamento absoluto',
+      'Remover tecido cariado com broca esférica',
+      'Confirmar remoção completa com cárie detector',
+      'Realizar condicionamento ácido (30–60s em esmalte)',
+      'Aplicar sistema adesivo conforme protocolo',
+      'Fotopolimerizar o adesivo (10s)',
+      'Inserir resina em incrementos de 2mm',
+      'Fotopolimerizar cada incremento (20–40s)',
+      'Ajustar oclusão com papel carbono',
+      'Realizar acabamento e polimento',
+      'Remover isolamento e verificar conforto',
+      'Orientar o paciente sobre cuidados',
+    ]
+  },
+  exodontia: {
+    title: 'Exodontia',
+    desc: 'Extração dentária simples sob supervisão.',
+    tip: 'Nunca inicie sem autorização do supervisor. Verifique PA e coagulação antes.',
+    tempoRef: 'Tempo médio: 20–40 min',
+    alerta: 2400,
+    items: [
+      'Confirmar indicação de exodontia com supervisor',
+      'Verificar pressão arterial e histórico de coagulação',
+      'Obter consentimento informado assinado',
+      'Separar o instrumental específico (fórceps, sindesmótomo, alavancas)',
+      'Aplicar anestesia infiltrativa e/ou bloqueio',
+      'Aguardar anestesia (± 5 min)',
+      'Realizar sindesmotomia (descolamento gengival)',
+      'Aplicar movimentos de luxação com alavanca se necessário',
+      'Posicionar e aplicar o fórceps adequado',
+      'Realizar movimentos de luxação e rotação controlados',
+      'Remover o dente com tração firme e suave',
+      'Inspecionar o alvéolo (coágulo, fragmentos)',
+      'Comprimir as bordas alveolares',
+      'Colocar gaze e orientar o paciente a morder',
+      'Passar orientações pós-operatórias (dieta, higiene, retorno)',
+    ]
+  },
+  selante: {
+    title: 'Selante',
+    desc: 'Aplicação de selante de fóssulas e fissuras.',
+    tip: 'A contaminação salivar é o principal motivo de falha. Mantenha campo seco rigorosamente.',
+    tempoRef: 'Por dente: 10–15 min',
+    alerta: 900,
+    items: [
+      'Selecionar dentes indicados (molares e pré-molares jovens)',
+      'Realizar profilaxia das superfícies oclusais',
+      'Instalar isolamento relativo com roletes de algodão',
+      'Condicionar com ácido fosfórico 37% por 15–30s',
+      'Lavar abundantemente por 20s',
+      'Secar sem contaminar com saliva',
+      'Aplicar o selante nas fóssulas e fissuras',
+      'Remover excessos com pincel',
+      'Fotopolimerizar por 20s',
+      'Verificar oclusão com papel carbono',
+      'Ajustar pontos de contato se necessário',
+    ]
+  }
+};
+
+// ─── Regras de sintomas ───
+const SYMPTOM_RULES = [
+  { key:'dor', words:['dor','doendo','dolorido','latejando','lateja','dói','doi'], question:'A dor é contínua ou aparece ao consumir alimentos frios/quentes/doces?' },
+  { key:'sensibilidade', words:['sensibilidade','sensível','gelado','quente','frio','doce'], question:'A sensibilidade dura mais que 30s após o estímulo? Isso pode indicar pulpite.' },
+  { key:'sangramento', words:['sangramento','sangra','sangrando','sangue'], question:'O sangramento ocorre espontaneamente ou apenas durante a escovação?' },
+  { key:'inchaco', words:['inchaço','inchado','inchar','edema','inchação'], question:'O inchaço aumentou nas últimas horas? Veio acompanhado de febre? (Sinal de urgência!)' },
+  { key:'mau-halito', words:['mau hálito','hálito ruim','cheiro na boca','bafo'], question:'O mau hálito é constante ou aparece após comer? Verifique placa e bolsas periodontais.' },
+  { key:'mobilidade', words:['amolecido','balançando','mobilidade','mexendo'], question:'O dente está com mobilidade? Classifique o grau (1-3) com o supervisor.' },
+  { key:'fratura', words:['quebrado','lascado','fratura','trincado','rachado'], question:'A fratura atingiu a dentina ou há exposição pulpar? Avalie necessidade de urgência.' },
+];
+
+// ─── State ───
+let duos = STORE.get('duos');
+let volunteers = STORE.get('volunteers');
+let triagens = STORE.get('triagens');
+let procedimentos = STORE.get('procedimentos');
+let prontuarios = STORE.getObj('prontuarios');
+let callHistory = STORE.get('callHistory');
+let duoIdx = parseInt(localStorage.getItem('of_duoIdx')||'0');
+let memberIdx = parseInt(localStorage.getItem('of_memberIdx')||'0');
+let currentProcKey = 'triagem';
+let timerSeconds = 0;
+let timerId = null;
+let selectedPatientId = null;
+
+// ═══════════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ═══════════════════════════════════════════════════════
+
+const PAGE_META = {
+  dashboard: { title:'Dashboard', sub:'Visão geral da sessão clínica' },
+  pacientes: { title:'Pacientes', sub:'Registros da sessão atual' },
+  triagem: { title:'Triagem', sub:'Registro e análise de sintomas do novo paciente' },
+  checklist: { title:'Checklists de Procedimentos', sub:'Passo a passo clínico com temporizador' },
+  prontuario: { title:'Prontuário', sub:'Anotações clínicas por paciente' },
+  distribuicao: { title:'Distribuição de Atendimentos', sub:'Rotação entre duplas de estudantes' },
+  voluntarios: { title:'Voluntários', sub:'Cadastro de pacientes para a clínica escola' },
+};
+
+function navigate(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  const btn = document.querySelector(`.nav-btn[data-view="${view}"]`);
+  if (btn) btn.classList.add('active');
+  const meta = PAGE_META[view];
+  document.getElementById('page-title').textContent = meta.title;
+  document.getElementById('page-sub').textContent = meta.sub;
+  if (view === 'dashboard') refreshDashboard();
+  if (view === 'checklist') renderProcTabs();
+  if (view === 'pacientes') renderPacientesList();
+  if (view === 'distribuicao') { renderDuoList(); renderCallHistory(); }
+  if (view === 'voluntarios') renderVolunteers();
+  if (view === 'prontuario') { populateProntSelect(); }
+}
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => navigate(btn.dataset.view));
+});
+
+// ═══════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════
+
+function refreshDashboard() {
+  triagens = STORE.get('triagens');
+  procedimentos = STORE.get('procedimentos');
+  volunteers = STORE.get('volunteers');
+
+  document.getElementById('stat-pacientes').textContent = triagens.length;
+  document.getElementById('stat-procedimentos').textContent = procedimentos.length;
+  document.getElementById('stat-voluntarios').textContent = volunteers.length;
+
+  // últimas triagens
+  const el = document.getElementById('dash-triagem-list');
+  if (triagens.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🦷</div>Nenhuma triagem registrada ainda.</div>';
+  } else {
+    el.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Paciente</th><th>Queixa</th><th>Horário</th></tr></thead><tbody>' +
+      triagens.slice().reverse().slice(0,5).map(t =>
+        `<tr><td><strong>${t.nome}</strong>, ${t.idade||'—'} anos</td><td>${t.queixa.substring(0,40)}${t.queixa.length>40?'…':''}</td><td class="text-mono" style="font-size:.78rem;color:var(--ink3)">${t.hora}</td></tr>`
+      ).join('') + '</tbody></table></div>';
+  }
+
+  // próximo da fila
+  updateDashNextCall();
+
+  // alertas
+  const alerts = [];
+  triagens.forEach(t => {
+    if (t.sintomas && t.sintomas.includes('inchaco')) {
+      alerts.push(`<div class="alert alert-danger mb-16">⚠️ <strong>${t.nome}</strong> relatou inchaço — verificar urgência.</div>`);
+    }
+  });
+  if (alerts.length === 0) alerts.push('<div class="alert alert-info">Nenhum alerta de urgência no momento.</div>');
+  document.getElementById('dash-alerts').innerHTML = alerts.join('');
+}
+
+function updateDashNextCall() {
+  duos = STORE.get('duos');
+  const el = document.getElementById('dash-next-call');
+  if (duos.length === 0) {
+    el.innerHTML = '<div><div class="text-muted">Cadastre duplas na distribuição</div><div class="next-call-name">—</div></div>';
+    return;
+  }
+  const idx = Math.min(duoIdx, duos.length-1);
+  const duo = duos[idx];
+  const student = duo.members[Math.min(memberIdx, duo.members.length-1)];
+  el.innerHTML = `<div><div class="next-call-duo">${duo.members.join(' / ')}</div><div class="next-call-name">${student}</div></div>`;
+}
+
+function callNextFromDash() {
+  navigate('distribuicao');
+  setTimeout(callNext, 100);
+}
+
+// ═══════════════════════════════════════════════════════
+// TRIAGEM
+// ═══════════════════════════════════════════════════════
+
+function analisarTriagem() {
+  const nome = document.getElementById('t-nome').value.trim();
+  const queixa = document.getElementById('t-queixa').value.trim();
+  if (!nome || !queixa) {
+    showAlert('triagem-alerta', 'Preencha pelo menos o nome e a queixa principal.', 'warn');
+    return;
+  }
+
+  const relato = document.getElementById('t-relato').value.toLowerCase() + ' ' + queixa.toLowerCase();
+
+  // detectar sintomas
+  const detected = SYMPTOM_RULES.filter(r => r.words.some(w => relato.includes(w)));
+  document.querySelectorAll('#t-sintomas-checks input').forEach(cb => {
+    cb.checked = detected.some(d => d.key === cb.value);
+    const item = cb.closest('.check-item');
+    if (cb.checked) item.classList.add('done'); else item.classList.remove('done');
+  });
+
+  // perguntas
+  const pEl = document.getElementById('t-perguntas');
+  if (detected.length === 0) {
+    pEl.innerHTML = '<li class="history-item" style="color:var(--ink3);font-style:italic">Nenhum sintoma-chave detectado. Pergunte sobre início, duração e intensidade.</li>';
+  } else {
+    pEl.innerHTML = detected.map(d =>
+      `<li class="history-item">❓ ${d.question}</li>`
+    ).join('');
+  }
+
+  // alerta urgência
+  const urgente = detected.some(d => d.key === 'inchaco');
+  if (urgente) {
+    showAlert('triagem-alerta', '⚠️ SINAL DE ALERTA: inchaço detectado. Chame o supervisor imediatamente.', 'danger');
+  } else if (detected.length > 0) {
+    showAlert('triagem-alerta', `${detected.length} sintoma(s) detectado(s). Revise os checkboxes e registre o paciente.`, 'info');
+  }
+}
+
+function limparTriagem() {
+  ['t-nome','t-idade','t-queixa','t-historico','t-alergias','t-medicamentos','t-pa','t-relato'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.querySelectorAll('#t-sintomas-checks input').forEach(cb => { cb.checked = false; cb.closest('.check-item').classList.remove('done'); });
+  document.getElementById('t-perguntas').innerHTML = '<li class="history-item" style="color:var(--ink3);font-style:italic">Faça a análise para ver as perguntas.</li>';
+  document.getElementById('triagem-alerta').innerHTML = '';
+}
+
+// Registrar paciente (chamado após análise)
+document.getElementById('view-triagem').addEventListener('dblclick', () => {});
+
+function registrarPaciente() {
+  const nome = document.getElementById('t-nome').value.trim();
+  const queixa = document.getElementById('t-queixa').value.trim();
+  if (!nome || !queixa) { showAlert('triagem-alerta','Preencha nome e queixa antes de registrar.','warn'); return; }
+
+  const sintomas = [...document.querySelectorAll('#t-sintomas-checks input:checked')].map(cb => cb.value);
+  const t = {
+    id: Date.now(),
+    nome,
+    idade: document.getElementById('t-idade').value,
+    queixa,
+    historico: document.getElementById('t-historico').value,
+    alergias: document.getElementById('t-alergias').value,
+    medicamentos: document.getElementById('t-medicamentos').value,
+    pa: document.getElementById('t-pa').value,
+    relato: document.getElementById('t-relato').value,
+    sintomas,
+    hora: new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
+    data: new Date().toLocaleDateString('pt-BR'),
+  };
+
+  triagens = STORE.get('triagens');
+  triagens.push(t);
+  STORE.set('triagens', triagens);
+
+  showAlert('triagem-alerta', `✓ Paciente <strong>${nome}</strong> registrado com sucesso!`, 'success');
+  limparTriagem();
+}
+
+// botão registrar na view triagem
+document.getElementById('view-triagem').querySelector('.btn-primary').addEventListener('click', () => {
+  analisarTriagem();
+  setTimeout(registrarPaciente, 100);
+});
+// remove o listener duplicado
+document.getElementById('view-triagem').querySelector('.btn-primary').removeEventListener('click', () => {});
+
+// ═══════════════════════════════════════════════════════
+// PACIENTES
+// ═══════════════════════════════════════════════════════
+
+function renderPacientesList() {
+  triagens = STORE.get('triagens');
+  const el = document.getElementById('pacientes-list');
+  if (triagens.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div>Nenhum paciente registrado. Registre pela Triagem.</div>';
+    return;
+  }
+  el.innerHTML = '<div style="display:grid;gap:8px">' +
+    triagens.slice().reverse().map(t => {
+      const urgente = t.sintomas && t.sintomas.includes('inchaco');
+      return `<div class="patient-card ${selectedPatientId===t.id?'active-patient':''}" onclick="showPatientDetail(${t.id})">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="patient-avatar">${t.nome.charAt(0).toUpperCase()}</div>
+          <div>
+            <div class="patient-name">${t.nome}</div>
+            <div class="patient-meta">${t.data} às ${t.hora} · ${t.queixa.substring(0,40)}${t.queixa.length>40?'…':''}</div>
+          </div>
+        </div>
+        <div>${urgente ? '<span class="badge badge-red">URGENTE</span>' : '<span class="badge badge-green">OK</span>'}</div>
+      </div>`;
+    }).join('') + '</div>';
+}
+
+function showPatientDetail(id) {
+  selectedPatientId = id;
+  const t = STORE.get('triagens').find(p => p.id === id);
+  if (!t) return;
+  renderPacientesList();
+  const el = document.getElementById('paciente-detail');
+  const sintLabels = { dor:'Dor', sensibilidade:'Sensibilidade térmica', sangramento:'Sangramento', inchaco:'Inchaço', 'mau-halito':'Mau hálito', mobilidade:'Dente amolecido', fratura:'Fratura' };
+  el.innerHTML = `
+    <div style="display:grid;gap:10px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+        <div class="patient-avatar" style="width:50px;height:50px;font-size:1.2rem">${t.nome.charAt(0).toUpperCase()}</div>
+        <div><div style="font-weight:700;font-size:1.05rem">${t.nome}</div><div class="text-muted">${t.idade ? t.idade+' anos · ' : ''}${t.data} às ${t.hora}</div></div>
+      </div>
+      <hr/>
+      ${row('Queixa principal', t.queixa)}
+      ${t.historico ? row('Histórico médico', t.historico) : ''}
+      ${t.alergias ? row('Alergias', `<span class="badge badge-red">${t.alergias}</span>`) : ''}
+      ${t.medicamentos ? row('Medicamentos', t.medicamentos) : ''}
+      ${t.pa ? row('Pressão arterial', `<span class="text-mono">${t.pa}</span>`) : ''}
+      ${t.relato ? row('Relato livre', `<em>${t.relato}</em>`) : ''}
+      ${t.sintomas && t.sintomas.length > 0 ? row('Sintomas detectados', t.sintomas.map(s => `<span class="badge badge-amber">${sintLabels[s]||s}</span>`).join(' ')) : ''}
+    </div>`;
+}
+
+function row(label, value) {
+  return `<div style="font-size:.85rem"><span style="font-weight:600;color:var(--ink2)">${label}:</span> <span style="color:var(--ink)">${value}</span></div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// CHECKLIST
+// ═══════════════════════════════════════════════════════
+
+function renderProcTabs() {
+  const tabs = document.getElementById('proc-tabs');
+  tabs.innerHTML = Object.entries(PROCEDIMENTOS).map(([k,v]) =>
+    `<button class="proc-tab ${k===currentProcKey?'active':''}" onclick="selectProc('${k}')">${v.title}</button>`
+  ).join('');
+  renderChecklist();
+}
+
+function selectProc(key) {
+  currentProcKey = key;
+  resetTimer();
+  renderProcTabs();
+}
+
+function renderChecklist() {
+  const proc = PROCEDIMENTOS[currentProcKey];
+  document.getElementById('proc-title').textContent = proc.title;
+  document.getElementById('proc-desc').textContent = proc.desc;
+  document.getElementById('proc-tip').textContent = proc.tip;
+  document.getElementById('timer-ref').textContent = proc.tempoRef;
+
+  const list = document.getElementById('proc-checklist');
+  list.innerHTML = proc.items.map((item, i) =>
+    `<label class="check-item" id="chk-wrap-${i}">
+      <input type="checkbox" id="chk-${i}" onchange="updateProgress()"/>
+      <span class="check-label">${i+1}. ${item}</span>
+    </label>`
+  ).join('');
+  updateProgress();
+}
+
+function updateProgress() {
+  const proc = PROCEDIMENTOS[currentProcKey];
+  const total = proc.items.length;
+  const done = document.querySelectorAll('#proc-checklist input:checked').length;
+  const pct = Math.round(done/total*100);
+
+  document.getElementById('proc-progresso').textContent = pct+'%';
+  const bar = document.getElementById('proc-progress-bar');
+  bar.style.width = pct+'%';
+  bar.className = 'progress-bar' + (pct===100?' green': pct>=50?' ':' amber');
+
+  document.querySelectorAll('#proc-checklist .check-item').forEach(item => {
+    const cb = item.querySelector('input');
+    if (cb.checked) item.classList.add('done'); else item.classList.remove('done');
+  });
+}
+
+function resetChecklist() {
+  document.querySelectorAll('#proc-checklist input').forEach(cb => {
+    cb.checked = false;
+    cb.closest('.check-item').classList.remove('done');
+  });
+  updateProgress();
+}
+
+function registrarProcedimento() {
+  const done = document.querySelectorAll('#proc-checklist input:checked').length;
+  const total = PROCEDIMENTOS[currentProcKey].items.length;
+  procedimentos = STORE.get('procedimentos');
+  procedimentos.push({
+    proc: currentProcKey,
+    title: PROCEDIMENTOS[currentProcKey].title,
+    done, total,
+    hora: new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
+    data: new Date().toLocaleDateString('pt-BR'),
+  });
+  STORE.set('procedimentos', procedimentos);
+  showModal('Procedimento registrado', `<div class="alert alert-success">✓ <strong>${PROCEDIMENTOS[currentProcKey].title}</strong> registrado (${done}/${total} etapas).</div><div style="margin-top:12px"><button class="btn btn-secondary" onclick="closeModal()">Fechar</button></div>`);
+}
+
+// ═══════════════════════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════════════════════
+
+function toggleTimer() {
+  if (timerId) {
+    clearInterval(timerId);
+    timerId = null;
+    document.getElementById('btn-timer-start').textContent = '▶ Retomar';
+  } else {
+    timerId = setInterval(() => { timerSeconds++; renderTimer(); }, 1000);
+    document.getElementById('btn-timer-start').textContent = '⏸ Pausar';
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerId); timerId = null;
+  timerSeconds = 0;
+  document.getElementById('btn-timer-start').textContent = '▶ Iniciar';
+  renderTimer();
+  document.getElementById('timer-alert').innerHTML = '';
+}
+
+function renderTimer() {
+  const min = String(Math.floor(timerSeconds/60)).padStart(2,'0');
+  const sec = String(timerSeconds%60).padStart(2,'0');
+  const display = document.getElementById('timer-display');
+  display.textContent = `${min}:${sec}`;
+  const alerta = PROCEDIMENTOS[currentProcKey].alerta;
+  if (timerSeconds > alerta * 1.5) {
+    display.className = 'timer-display danger';
+    document.getElementById('timer-alert').innerHTML = '<div class="alert alert-danger">⚠️ Tempo muito elevado — risco de desconforto. Chame o supervisor.</div>';
+  } else if (timerSeconds > alerta) {
+    display.className = 'timer-display warn';
+    document.getElementById('timer-alert').innerHTML = '<div class="alert alert-warn">⏱ Tempo acima do esperado — verifique o andamento.</div>';
+  } else {
+    display.className = 'timer-display';
+    document.getElementById('timer-alert').innerHTML = '';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// PRONTUÁRIO
+// ═══════════════════════════════════════════════════════
+
+function populateProntSelect() {
+  triagens = STORE.get('triagens');
+  const sel = document.getElementById('pront-select');
+  sel.innerHTML = '<option value="">— Selecione —</option>' +
+    triagens.map(t => `<option value="${t.id}">${t.nome} (${t.data})</option>`).join('');
+}
+
+function carregarProntuario() {
+  const id = parseInt(document.getElementById('pront-select').value);
+  if (!id) { document.getElementById('pront-content').innerHTML = '<div class="empty-state">Selecione um paciente.</div>'; return; }
+  const t = STORE.get('triagens').find(p => p.id === id);
+  if (!t) return;
+  const p = prontuarios[id] || {};
+  const sintLabels = { dor:'Dor', sensibilidade:'Sensibilidade térmica', sangramento:'Sangramento gengival', inchaco:'Inchaço', 'mau-halito':'Mau hálito', mobilidade:'Dente amolecido', fratura:'Fratura' };
+
+  document.getElementById('pront-content').innerHTML = `
+    <div style="border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;background:var(--surface2)">
+      <div style="font-weight:700;font-size:1rem;margin-bottom:8px">${t.nome}</div>
+      ${t.idade ? `<div class="text-muted">${t.idade} anos · ${t.data}</div>` : ''}
+      <hr style="margin:10px 0"/>
+      ${row('Queixa', t.queixa)}
+      ${t.alergias ? `<div class="alert alert-danger mt-8" style="font-size:.82rem">⚠️ Alergia: ${t.alergias}</div>` : ''}
+      ${t.sintomas && t.sintomas.length > 0 ? `<div style="margin-top:8px">${t.sintomas.map(s => `<span class="badge badge-amber" style="margin-right:4px">${sintLabels[s]||s}</span>`).join('')}</div>` : ''}
+      ${p.obs ? `<hr style="margin:10px 0"/><div class="text-muted" style="font-size:.78rem">Anotação clínica</div><div style="font-size:.88rem;margin-top:4px">${p.obs}</div>` : ''}
+      ${p.proc ? `<div style="margin-top:8px"><span class="badge badge-blue">${p.proc}</span></div>` : ''}
+      ${p.proxima ? `<div class="text-muted" style="font-size:.8rem;margin-top:6px">📅 Próxima consulta: ${p.proxima}</div>` : ''}
+    </div>`;
+
+  if (p.obs) document.getElementById('pront-obs').value = p.obs;
+  if (p.proc) document.getElementById('pront-proc').value = p.proc;
+  if (p.proxima) document.getElementById('pront-proxima').value = p.proxima;
+}
+
+function salvarAnotacao() {
+  const id = parseInt(document.getElementById('pront-select').value);
+  if (!id) { showAlert('pront-msg','Selecione um paciente primeiro.','warn'); return; }
+  prontuarios = STORE.getObj('prontuarios');
+  prontuarios[id] = {
+    obs: document.getElementById('pront-obs').value,
+    proc: document.getElementById('pront-proc').value,
+    proxima: document.getElementById('pront-proxima').value,
+    salvoEm: new Date().toLocaleString('pt-BR'),
+  };
+  STORE.setObj('prontuarios', prontuarios);
+  showAlert('pront-msg','✓ Anotação salva.','success');
+  carregarProntuario();
+}
+
+// ═══════════════════════════════════════════════════════
+// DISTRIBUIÇÃO
+// ═══════════════════════════════════════════════════════
+
+function addDuo() {
+  const input = document.getElementById('duo-input');
+  const parts = input.value.split('/').map(s => s.trim()).filter(Boolean);
+  if (parts.length !== 2) { alert('Use o formato: Nome 1 / Nome 2'); return; }
+  duos = STORE.get('duos');
+  duos.push({ members: parts });
+  STORE.set('duos', duos);
+  input.value = '';
+  renderDuoList();
+}
+
+function renderDuoList() {
+  duos = STORE.get('duos');
+  const el = document.getElementById('duo-list-wrap');
+  if (duos.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div>Nenhuma dupla cadastrada.</div>';
+    return;
+  }
+  el.innerHTML = '<div class="table-wrap mt-12"><table><thead><tr><th>#</th><th>Aluno 1</th><th>Aluno 2</th><th></th></tr></thead><tbody>' +
+    duos.map((d, i) =>
+      `<tr><td class="text-muted text-mono">${i+1}</td><td>${d.members[0]}</td><td>${d.members[1]}</td><td><button class="btn btn-danger btn-sm" onclick="removeDuo(${i})">✕</button></td></tr>`
+    ).join('') + '</tbody></table></div>';
+}
+
+function removeDuo(idx) {
+  duos = STORE.get('duos');
+  duos.splice(idx, 1);
+  STORE.set('duos', duos);
+  if (duoIdx >= duos.length) { duoIdx = 0; memberIdx = 0; }
+  localStorage.setItem('of_duoIdx', duoIdx);
+  localStorage.setItem('of_memberIdx', memberIdx);
+  renderDuoList();
+}
+
+function callNext() {
+  duos = STORE.get('duos');
+  if (duos.length === 0) { alert('Cadastre ao menos uma dupla.'); return; }
+  duoIdx = Math.min(duoIdx, duos.length-1);
+  const duo = duos[duoIdx];
+  const student = duo.members[memberIdx];
+
+  document.getElementById('dist-next-call').innerHTML = `<div><div class="next-call-duo">${duo.members.join(' / ')}</div><div class="next-call-name">${student}</div></div>`;
+
+  callHistory = STORE.get('callHistory');
+  callHistory.unshift({ student, duo: duo.members.join(' / '), hora: new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) });
+  if (callHistory.length > 30) callHistory.pop();
+  STORE.set('callHistory', callHistory);
+  renderCallHistory();
+
+  memberIdx = memberIdx === 0 ? 1 : 0;
+  if (memberIdx === 0) duoIdx = (duoIdx + 1) % duos.length;
+  localStorage.setItem('of_duoIdx', duoIdx);
+  localStorage.setItem('of_memberIdx', memberIdx);
+  updateDashNextCall();
+}
+
+function renderCallHistory() {
+  callHistory = STORE.get('callHistory');
+  const el = document.getElementById('call-history');
+  if (callHistory.length === 0) {
+    el.innerHTML = '<div class="empty-state" style="padding:16px">Nenhuma chamada realizada.</div>';
+    return;
+  }
+  el.innerHTML = callHistory.slice(0,10).map((c,i) =>
+    `<div class="history-item"><span class="history-time">${c.hora}</span><span>${c.student} <span style="color:var(--ink3)">(${c.duo})</span></span>${i===0?'<span class="badge badge-blue" style="margin-left:auto">atual</span>':''}</div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// VOLUNTÁRIOS
+// ═══════════════════════════════════════════════════════
+
+function addVoluntario() {
+  const nome = document.getElementById('vol-nome').value.trim();
+  const idade = document.getElementById('vol-idade').value;
+  const tel = document.getElementById('vol-tel').value.trim();
+  const disp = document.getElementById('vol-disp').value;
+  if (!nome || !tel || !disp) { showAlert('vol-msg','Preencha os campos obrigatórios.','warn'); return; }
+  volunteers = STORE.get('volunteers');
+  volunteers.push({ id: Date.now(), nome, idade, tel, disp, queixa: document.getElementById('vol-queixa').value, data: new Date().toLocaleDateString('pt-BR') });
+  STORE.set('volunteers', volunteers);
+  ['vol-nome','vol-idade','vol-tel','vol-queixa'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('vol-disp').value = '';
+  showAlert('vol-msg','✓ Voluntário cadastrado!','success');
+  renderVolunteers();
+}
+
+function renderVolunteers() {
+  volunteers = STORE.get('volunteers');
+  document.getElementById('vol-count').textContent = volunteers.length;
+  const el = document.getElementById('vol-list');
+  if (volunteers.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">❤️</div>Nenhum voluntário cadastrado.</div>';
+    return;
+  }
+  el.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Idade</th><th>Disponibilidade</th><th>Contato</th></tr></thead><tbody>' +
+    volunteers.map(v =>
+      `<tr><td><strong>${v.nome}</strong>${v.queixa?`<div class="text-muted" style="font-size:.75rem">${v.queixa}</div>`:''}</td><td>${v.idade||'—'}</td><td><span class="badge badge-purple">${v.disp}</span></td><td class="text-mono" style="font-size:.8rem">${v.tel}</td></tr>`
+    ).join('') + '</tbody></table></div>';
+}
+
+function copyLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => showAlert('vol-msg','Link copiado!','success'));
+}
+
+function exportVoluntarios() {
+  volunteers = STORE.get('volunteers');
+  if (volunteers.length === 0) { alert('Nenhum voluntário para exportar.'); return; }
+  const csv = 'Nome,Idade,Telefone,Disponibilidade,Queixa,Data\n' +
+    volunteers.map(v => `"${v.nome}","${v.idade}","${v.tel}","${v.disp}","${v.queixa||''}","${v.data}"`).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'voluntarios_odontoflow.csv';
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILITÁRIOS
+// ═══════════════════════════════════════════════════════
+
+function showAlert(elId, msg, type='info') {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  setTimeout(() => { if (el.innerHTML.includes(msg)) el.innerHTML = ''; }, 4000);
+}
+
+function showModal(title, body) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = body;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('open');
+  }
+}
+
+function clearSession() {
+  if (!confirm('Limpar todos os dados desta sessão? Isso remove pacientes, duplas e histórico.')) return;
+  ['triagens','procedimentos','voluntarios','duos','callHistory'].forEach(k => localStorage.removeItem('of_'+k));
+  localStorage.removeItem('of_prontuarios');
+  localStorage.removeItem('of_duoIdx');
+  localStorage.removeItem('of_memberIdx');
+  triagens=[]; procedimentos=[]; volunteers=[]; duos=[]; callHistory=[]; prontuarios={};
+  duoIdx=0; memberIdx=0;
+  navigate('dashboard');
+}
+
+// Clock
+function updateClock() {
+  const el = document.getElementById('session-clock');
+  if (el) el.textContent = new Date().toLocaleTimeString('pt-BR');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// TRIAGEM: fix botão que tem dois eventos
+(function fixTriagemBtn(){
+  const btn = document.querySelector('#view-triagem .btn-primary');
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+  newBtn.addEventListener('click', () => {
+    analisarTriagem();
+    setTimeout(registrarPaciente, 150);
+  });
+})();
+
+// init
+renderProcTabs();
+refreshDashboard();
+</script>
+</body>
+</html>
